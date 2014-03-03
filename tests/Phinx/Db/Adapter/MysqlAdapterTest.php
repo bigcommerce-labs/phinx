@@ -272,7 +272,40 @@ class MysqlAdapterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('', $rows[0]['Extra']);
         $this->assertEquals('auto_increment', $rows[1]['Extra']);
     }
-    
+
+    public function testAddIntegerColumnWithDefaultSigned()
+    {
+        $table = new \Phinx\Db\Table('table1', array(), $this->adapter);
+        $table->save();
+        $this->assertFalse($table->hasColumn('user_id'));
+        $table->addColumn('user_id', 'integer')
+              ->save();
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
+        $this->assertEquals('int(11)', $rows[1]['Type']);
+    }
+
+    public function testAddIntegerColumnWithSignedEqualsFalse()
+    {
+        $table = new \Phinx\Db\Table('table1', array(), $this->adapter);
+        $table->save();
+        $this->assertFalse($table->hasColumn('user_id'));
+        $table->addColumn('user_id', 'integer', array('signed' => false))
+              ->save();
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
+        $this->assertEquals('int(11) unsigned', $rows[1]['Type']);
+    }
+
+    public function testAddStringColumnWithSignedEqualsFalse()
+    {
+        $table = new \Phinx\Db\Table('table1', array(), $this->adapter);
+        $table->save();
+        $this->assertFalse($table->hasColumn('user_id'));
+        $table->addColumn('user_id', 'string', array('signed' => false))
+              ->save();
+        $rows = $this->adapter->fetchAll('SHOW COLUMNS FROM table1');
+        $this->assertEquals('varchar(255)', $rows[1]['Type']);
+    }
+
     public function testRenameColumn()
     {
         $table = new \Phinx\Db\Table('t', array(), $this->adapter);

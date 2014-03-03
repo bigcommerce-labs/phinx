@@ -40,6 +40,9 @@ use Phinx\Db\Table\ForeignKey;
  */
 class MysqlAdapter extends PdoAdapter implements AdapterInterface
 {
+
+    protected $signedColumnTypes = array('integer' => true, 'biginteger' => true, 'float' => true, 'decimal' => true);
+
     /**
      * {@inheritdoc}
      */
@@ -808,6 +811,7 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         }
         $def .= ($column->getLimit() || isset($sqlType['limit']))
                      ? '(' . ($column->getLimit() ? $column->getLimit() : $sqlType['limit']) . ')' : '';
+        $def .= (! $column->isSigned() && isset($this->signedColumnTypes[$column->getType()])) ? ' unsigned' : '' ;
         $def .= ($column->isNull() == false) ? ' NOT NULL' : ' NULL';
         $def .= ($column->isIdentity() || $column->isAutoIncrement()) ? ' AUTO_INCREMENT' : '';
         $default = $column->getDefault();
